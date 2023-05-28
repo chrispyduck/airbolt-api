@@ -1,6 +1,8 @@
-from typing import List, Optional, Literal
-from pydantic import BaseModel, Field, conint, EmailStr
 from datetime import datetime
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, EmailStr, Field, conint
+
 
 class UserInfo(BaseModel):
     id: str = Field(alias="_id")

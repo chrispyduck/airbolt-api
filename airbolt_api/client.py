@@ -1,12 +1,14 @@
-from typing import List, Optional
-import requests
-from pydantic import parse_raw_as
-from datetime import datetime
-from classes import DeviceHistoryPage, FoundDevice, HistoryEntry, UserInfo, LoginResult
-from base64 import b64encode
-from urllib.parse import urljoin
-import json 
+import json
 import logging
+from base64 import b64encode
+from datetime import datetime
+from typing import List, Optional
+from urllib.parse import urljoin
+
+import requests
+from classes import (DeviceHistoryPage, FoundDevice, HistoryEntry, LoginResult,
+                     UserInfo)
+from pydantic import parse_raw_as
 
 logger: logging.Logger = logging.getLogger("airbolt_api.client")
 
