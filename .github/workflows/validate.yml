@@ -31,6 +31,9 @@ jobs:
     - name: Lint with bandit
       run: |
         bandit ./airbolt_api/*.py
+    - name: Check with isort
+      run: |
+        isort -c .
     # - name: Test with pytest
     #   run: |
     #     pytest
