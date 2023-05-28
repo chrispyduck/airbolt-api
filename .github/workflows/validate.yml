@@ -29,11 +29,10 @@ jobs:
         poetry install --with=dev
     - name: Lint with bandit
       run: |
-        poetry shell
-        bandit ./airbolt_api/*.py
+        poetry run bandit ./airbolt_api/*.py
     - name: Check with isort
       run: |
-        isort -c .
+        poetry run isort -c .
     # - name: Test with pytest
     #   run: |
     #     pytest
