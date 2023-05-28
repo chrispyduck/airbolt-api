@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional
 from urllib.parse import urljoin
 
-import requests
+from aiohttp import ClientSession
 from classes import (DeviceHistoryPage, FoundDevice, HistoryEntry, LoginResult,
                      UserInfo)
 from pydantic import parse_raw_as
@@ -16,13 +16,13 @@ logger: logging.Logger = logging.getLogger("airbolt_api.client")
 class AirboltClient:
     BASE_URL = "https://airboltapiconnect.com/api/"
 
-    _session: requests.Session
+    _session: ClientSession
     _username: str
     _password: str
     _login_result: LoginResult
 
     def __init__(self, user_id: str, password: str):
-        self._session = requests.Session()
+        self._session = ClientSession()
         self._session.headers.update({
             "Accept": "application/json",
             "Authorization": "",
@@ -31,23 +31,32 @@ class AirboltClient:
         self._username = user_id
         self._password = password
 
-    def _get(self, path: str) -> str:
-        response = self._session.get(urljoin(AirboltClient.BASE_URL, path))
-        if response.status_code == 200:
-            return response.text
+    async def __aenter__(self) -> "AirboltClient":
+        return self
+
+    async def __aexit__(self, *args):
+        await self.close()
+
+    async def close(self):
+        await self._session.close()
+
+    async def _get(self, path: str) -> str:
+        response = await self._session.get(urljoin(AirboltClient.BASE_URL, path))
+        if response.status == 200:
+            return await response.text()
         
         raise response.raise_for_status()
     
-    def _post(self, path: str, body: dict) -> str:
-        response = self._session.post(urljoin(AirboltClient.BASE_URL, path), json.dumps(body))
-        if response.status_code == 200:
-            return response.text
+    async def _post(self, path: str, body: dict) -> str:
+        response = await self._session.post(urljoin(AirboltClient.BASE_URL, path), json=body)
+        if response.status == 200:
+            return await response.text()
         
         raise response.raise_for_status()
 
 
-    def login(self) -> LoginResult:
-        raw_response = self._post("login", {
+    async def login(self) -> LoginResult:
+        raw_response = await self._post("login", {
             "username": self._username,
             "password": self._password,
             "twoFactorCode": "",
@@ -64,14 +73,14 @@ class AirboltClient:
         return self._login_result
         
 
-    def get_user_info(self) -> UserInfo:
-        raw_data = self._get("users/me")
+    async def get_user_info(self) -> UserInfo:
+        raw_data = await self._get("users/me")
         return UserInfo.parse_raw(raw_data)
     
-    def find_devices(self) -> List[FoundDevice]:
-        raw_data = self._get(f"devices/find/{self._login_result.id}?page=0&perPage=999")
+    async def find_devices(self) -> List[FoundDevice]:
+        raw_data = await self._get(f"devices/find/{self._login_result.id}?page=0&perPage=999")
         return parse_raw_as(List[FoundDevice], raw_data)
     
-    def get_device_history_page(self, device_uuid: str, page: int = 1, page_size: int = 10) -> List[DeviceHistoryPage]:
-        raw_data = self._get(f"history/find/device/{device_uuid}?page={page}&perPage={page_size}")
+    async def get_device_history_page(self, device_uuid: str, page: int = 1, page_size: int = 10) -> List[DeviceHistoryPage]:
+        raw_data = await self._get(f"history/find/device/{device_uuid}?page={page}&perPage={page_size}")
         return parse_raw_as(DeviceHistoryPage, raw_data)

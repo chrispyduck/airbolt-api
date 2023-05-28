@@ -13,11 +13,11 @@ A limited client for the Airbolt API that provides information about their GPS t
 from airbolt_api import AirboltClient
 
 
-def run():
-    client = AirboltClient("username", "password")
-    client.login()
-    for device in client.find_devices():
-        history = client.get_device_history_page(device.device_uuid, page=1, page_size=10)
-        print(f" * {device.name} at {history.data[0].address} on {history.data[0].time_created}")
+async def run():
+    await with AirboltClient("username", "password") as client:
+        await client.login()
+        for device in await client.find_devices():
+            history = await client.get_device_history_page(device.device_uuid, page=1, page_size=10)
+            print(f" * {device.name} at {history.data[0].address} on {history.data[0].time_created}")
 
 ```
