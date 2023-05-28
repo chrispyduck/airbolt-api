@@ -1,0 +1,21 @@
+[project]
+name = "airbolt-api"
+
+[tool.poetry]
+name = "airbolt-api"
+version = "0.1.0"
+description = ""
+authors = ["Chris Carlson <chrispyduck@noreply.github.io>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "airbolt_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = {extras = ["email"], version = "^1.10.8"}
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
