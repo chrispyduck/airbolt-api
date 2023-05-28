@@ -17,19 +17,15 @@ class AirboltClient:
     BASE_URL = "https://airboltapiconnect.com/api/"
 
     _session: ClientSession
-    _username: str
-    _password: str
     _login_result: LoginResult
 
-    def __init__(self, user_id: str, password: str):
+    def __init__(self):
         self._session = ClientSession()
         self._session.headers.update({
             "Accept": "application/json",
             "Authorization": "",
             "Content-Type": "application/json; charset=utf-8",
         })
-        self._username = user_id
-        self._password = password
 
     async def __aenter__(self) -> "AirboltClient":
         return self
@@ -55,10 +51,10 @@ class AirboltClient:
         raise response.raise_for_status()
 
 
-    async def login(self) -> LoginResult:
+    async def login(self, username: str, password: str) -> LoginResult:
         raw_response = await self._post("login", {
-            "username": self._username,
-            "password": self._password,
+            "username": username,
+            "password": password,
             "twoFactorCode": "",
         })
         self._login_result = LoginResult.parse_raw(raw_response)
